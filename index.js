@@ -5,6 +5,9 @@ var airQualitySensor = require('./sensors/air-quality-sensor.js')
 var temperatureSensor = require('./sensors/temperature-sensor.js')
 var vibrationsSensor = require('./sensors/vibrations-sensor.js')
 
+//get mongodb library
+var mongodb = require('mongodb');
+
 app.get('/sendAirQuality', async function(req, res) {
     console.log("send Air Quality endpoint hit")
     var response = await airQualitySensor.storeAirQuality();
@@ -19,7 +22,7 @@ app.get('/sendAirQuality', async function(req, res) {
 app.get('/sendTemperature', async function(req, res) {
     console.log("send Temperature endpoint hit")
     console.log("The temperature is " + req.query.temp);
-    var response = await temperatureSensor.storeTemperature();
+    var response = await temperatureSensor.storeTemperature(req.query.temp);
     if(response == true) {
         console.log("store successfull");
     } else {
@@ -44,3 +47,71 @@ app.listen(process.env.PORT || PORT, ()=> {
 })
 
 
+//display temperatureSensor table
+
+var MongoClient = mongodb.MongoClient;
+var url = 'mongodb://localhost:27017/sensorDatabase';
+
+MongoClient.connect(url, function(err, db)
+{
+    if(err)
+    {
+        console.log('error occurred');
+    }
+    else
+    {
+        console.log('Connection estabelished');
+        var collection = db.collection('temperatureSensor');
+        collection.find({}).toArray(function(err, result)
+        {
+            if(err)
+            {
+                console.log('database error');
+            }
+            else
+            {
+                console.log(result.length);
+            }
+
+            db.close();
+        }
+        );
+    }
+});
+
+//
+
+// add new data
+
+/*var MongoClient = mongodb.MongoClient;
+var url = 'mongodb://localhost:27017/sensorDatabase';
+
+MongoClient.connect(url, function(err, db)
+{
+    if(err)
+    {
+        console.log('error occurred');
+    }
+    else
+    {
+        console.log('Connection estabelished');
+        var collection = db.collection('temperatureSensor');
+        var tempData = {value : 123.4, timestamp : 1234};
+
+        collection.insert(tempData, function(err, result)
+        {
+            if(err)
+            {
+                console.log('Error inserting data');
+            }
+            else
+            {
+                console.log('Data added');
+            }
+            db.close();
+        }
+        );
+    }
+});*/
+
+//
